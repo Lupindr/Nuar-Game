@@ -29,7 +29,7 @@ const PaperclipIcon = () => (
 
 
 const SuspectCard: React.FC<SuspectCardProps> = ({ card, onClick, isSelectable, isPlayerIdentity, isEliminatedPlayer, isRevealed, isDisappearing }) => {
-  const imageUrl = `https://picsum.photos/seed/${card.suspect.id}/100/140?grayscale`;
+  const imageUrl = card.suspect.imageUrl;
   
   let borderClasses = 'border-zinc-400';
   let otherClasses = '';

@@ -3,6 +3,7 @@ import { SUSPECTS } from './constants';
 export interface Suspect {
   id: number;
   name: string;
+  imageUrl: string;
 }
 
 export interface BoardCard {
