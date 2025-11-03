@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import GameSetup from './components/GameSetup';
 import GameBoard from './components/GameBoard';
 import PlayerDashboard from './components/PlayerDashboard';
@@ -88,6 +88,33 @@ const App: React.FC = () => {
     const [activeAction, setActiveAction] = useState<ActionType>(null);
     const [selectablePositions, setSelectablePositions] = useState<{row: number, col: number}[]>([]);
     const [modal, setModal] = useState<{isOpen: boolean, title: string, content: React.ReactNode, onClose?: () => void}>({isOpen: false, title: '', content: null});
+    const [isCompacting, setIsCompacting] = useState(false);
+    
+    const boardRef = useRef(board);
+    boardRef.current = board;
+
+    useEffect(() => {
+        if (isCompacting) {
+            const timer = setTimeout(() => {
+                const compacted = compactBoard(boardRef.current);
+                setBoard(compacted);
+                setIsCompacting(false);
+            }, 600); // Duration should be slightly longer than CSS transition
+            return () => clearTimeout(timer);
+        }
+    }, [isCompacting]);
+
+    const performCompactionCheck = (boardAfterAction: Board) => {
+        const testBoard = compactBoard(boardAfterAction);
+        const shouldCompact = testBoard.length < boardAfterAction.length || (testBoard[0]?.length ?? 0) < (boardAfterAction[0]?.length ?? 0);
+
+        setBoard(boardAfterAction);
+
+        if (shouldCompact) {
+            setIsCompacting(true);
+        }
+    };
+
 
     const findSuspectOnBoard = useCallback((suspectId: number) => {
         for (let r = 0; r < board.length; r++) {
@@ -208,13 +235,11 @@ const App: React.FC = () => {
 
         const playerPos = findSuspectOnBoard(playerToEliminate.secretIdentity.id);
         if(playerPos) {
-            setBoard(prev => {
-                const newBoard: Board = prev.map(r => r.map(c => ({ ...c })));
-                const card = newBoard[playerPos.row][playerPos.col];
-                card.isAlive = false;
-                card.isRevealed = true;
-                return compactBoard(newBoard);
-            });
+            const newBoard: Board = board.map(r => r.map(c => ({ ...c })));
+            const card = newBoard[playerPos.row][playerPos.col];
+            card.isAlive = false;
+            card.isRevealed = true;
+            performCompactionCheck(newBoard);
         }
 
         setPlayers(prev => prev.map(p => p.id === playerId ? {...p, isEliminated: true} : p));
@@ -232,7 +257,7 @@ const App: React.FC = () => {
                 }
              } });
         }
-    }, [players, findSuspectOnBoard, advanceTurn, currentPlayerIndex]);
+    }, [players, findSuspectOnBoard, advanceTurn, currentPlayerIndex, board]);
 
     const handleKill = (row: number, col: number) => {
         const targetSuspect = board[row][col].suspect;
@@ -260,13 +285,11 @@ const App: React.FC = () => {
             if (availableSuspects.length > 0) {
                 const oldPlayerPos = findSuspectOnBoard(victimPlayer.secretIdentity.id);
                 if (oldPlayerPos) {
-                    setBoard(prev => {
-                        const newBoard: Board = prev.map(r => r.map(c => ({ ...c })));
-                        const card = newBoard[oldPlayerPos.row][oldPlayerPos.col];
-                        card.isAlive = false;
-                        card.isRevealed = true;
-                        return compactBoard(newBoard);
-                    });
+                     const newBoard: Board = board.map(r => r.map(c => ({ ...c })));
+                     const card = newBoard[oldPlayerPos.row][oldPlayerPos.col];
+                     card.isAlive = false;
+                     card.isRevealed = true;
+                     performCompactionCheck(newBoard);
                 }
                 
                 const newIdentity = shuffleArray(availableSuspects)[0].suspect;
@@ -292,13 +315,11 @@ const App: React.FC = () => {
         } 
         // СЛУЧАЙ 2: Попали в мирного жителя
         else {
-            setBoard(prev => {
-                const newBoard: Board = prev.map(r => r.map(c => ({ ...c })));
-                const card = newBoard[row][col];
-                card.isAlive = false;
-                card.isRevealed = true;
-                return compactBoard(newBoard);
-            });
+            const newBoard: Board = board.map(r => r.map(c => ({ ...c })));
+            const card = newBoard[row][col];
+            card.isAlive = false;
+            card.isRevealed = true;
+            performCompactionCheck(newBoard);
             
             const newBombs = killer.bombs + 1;
             setPlayers(prev => prev.map(p => p.id === killer.id ? { ...p, bombs: newBombs } : p));
@@ -385,7 +406,7 @@ const App: React.FC = () => {
     };
 
     const handleShift = (axis: 'row' | 'col', index: number, direction: 1 | -1) => {
-        if (activeAction) return;
+        if (activeAction || isCompacting) return;
         const newBoard: Board = board.map(r => r.map(c => ({...c})));
         if (axis === 'row') {
             const row = newBoard[index];
@@ -424,7 +445,7 @@ const App: React.FC = () => {
                             <h1 className="text-3xl font-title text-red-500">Нуар: Шпионские Игры</h1>
                             <p>Ход: <span className="font-bold text-yellow-300">{currentPlayer?.name}</span></p>
                         </header>
-                         <GameBoard board={board} onCardClick={handleCardClick} onShift={handleShift} selectablePositions={selectablePositions} currentPlayer={currentPlayer} players={players}/>
+                         <GameBoard board={board} onCardClick={handleCardClick} onShift={handleShift} selectablePositions={selectablePositions} currentPlayer={currentPlayer} players={players} isCompacting={isCompacting} />
                         <div className="w-full bg-zinc-800 p-4 border-t-2 border-zinc-700 flex justify-center items-center space-x-4">
                             <button onClick={() => handleActionSelect('interrogate')} className={`px-6 py-3 rounded font-title text-lg transition-colors ${activeAction === 'interrogate' ? 'bg-yellow-500 text-black' : 'bg-zinc-700 hover:bg-zinc-600'}`}>Опрос</button>
                             <button onClick={() => handleActionSelect('kill')} className={`px-6 py-3 rounded font-title text-lg transition-colors ${activeAction === 'kill' ? 'bg-red-600 text-white' : 'bg-zinc-700 hover:bg-zinc-600'}`}>Убить</button>

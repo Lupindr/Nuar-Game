@@ -10,6 +10,7 @@ interface SuspectCardProps {
   isPlayerIdentity: boolean;
   isEliminatedPlayer: boolean;
   isRevealed?: boolean;
+  isDisappearing?: boolean;
 }
 
 const PaperclipIcon = () => (
@@ -27,7 +28,7 @@ const PaperclipIcon = () => (
 );
 
 
-const SuspectCard: React.FC<SuspectCardProps> = ({ card, onClick, isSelectable, isPlayerIdentity, isEliminatedPlayer, isRevealed }) => {
+const SuspectCard: React.FC<SuspectCardProps> = ({ card, onClick, isSelectable, isPlayerIdentity, isEliminatedPlayer, isRevealed, isDisappearing }) => {
   const imageUrl = `https://picsum.photos/seed/${card.suspect.id}/100/140?grayscale`;
   
   let borderClasses = 'border-zinc-400';
@@ -43,11 +44,12 @@ const SuspectCard: React.FC<SuspectCardProps> = ({ card, onClick, isSelectable, 
   }
 
   const cardClasses = `
-    w-full aspect-[2/3] rounded-md shadow-lg border transition-all duration-200
+    w-full aspect-[2/3] rounded-md shadow-lg border transition-all duration-500
     flex flex-col p-1 bg-[#f5eeda] relative
     ${borderClasses}
     ${otherClasses}
-    ${!card.isAlive ? 'brightness-75' : ''}
+    ${!card.isAlive && !isDisappearing ? 'brightness-75' : ''}
+    ${isDisappearing ? 'opacity-0 scale-50 rotate-12' : 'opacity-100 scale-100 rotate-0'}
   `;
 
   return (
