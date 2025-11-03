@@ -1,0 +1,5 @@
+{
+  "name": "Copy of Noir: Spy Games",
+  "description": "A web-based implementation of the Noir board game variant 'Spy Games' for 3-16 players. All players are spies trying to capture others to collect trophies. A new 'Kill' action adds a risk-reward element where killing civilians adds bombs, and accumulating three bombs eliminates a player.",
+  "requestFramePermissions": []
+}
