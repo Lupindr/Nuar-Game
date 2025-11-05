@@ -10,11 +10,21 @@ interface GameBoardProps {
   currentPlayer: Player | null;
   players: Player[];
   isCompacting: boolean;
+  isCurrentPlayerView: boolean;
 }
 
-const GameBoard: React.FC<GameBoardProps> = ({ board, onCardClick, onShift, selectablePositions, currentPlayer, players, isCompacting }) => {
+const GameBoard: React.FC<GameBoardProps> = ({
+  board,
+  onCardClick,
+  onShift,
+  selectablePositions,
+  currentPlayer,
+  players,
+  isCompacting,
+  isCurrentPlayerView,
+}) => {
   if (!board.length || !board[0]?.length) return null;
-  
+
   const numRows = board.length;
   const numCols = board[0].length;
 
@@ -29,9 +39,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ board, onCardClick, onShift, sele
     }
     return null;
   };
-  
-  const playerPosition = getPlayerPosition(currentPlayer);
-  
+
+  const visibleSelectablePositions = isCurrentPlayerView ? selectablePositions : [];
+  const playerPosition = isCurrentPlayerView ? getPlayerPosition(currentPlayer) : null;
+
   return (
     <div className="flex-grow flex items-center justify-center p-4">
       <div className="grid items-center gap-x-4 gap-y-2 transition-all duration-500" style={{
@@ -58,12 +69,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ board, onCardClick, onShift, sele
           row.map((card, colIndex) => {
             const isEliminatedPlayer = players.some(p => p.isEliminated && p.secretIdentity.id === card.suspect.id);
             const isDisappearing = isCompacting && !card.isAlive;
+            const isSelectable = visibleSelectablePositions.some(p => p.row === rowIndex && p.col === colIndex);
             return (
                 <div key={`${card.suspect.id}-${rowIndex}-${colIndex}`} style={{gridRow: rowIndex + 2, gridColumn: colIndex + 2}}>
                     <SuspectCard
                         card={card}
-                        onClick={() => onCardClick(rowIndex, colIndex)}
-                        isSelectable={selectablePositions.some(p => p.row === rowIndex && p.col === colIndex)}
+                        onClick={() => {
+                          if (isCurrentPlayerView) {
+                            onCardClick(rowIndex, colIndex);
+                          }
+                        }}
+                        isSelectable={isSelectable}
                         isPlayerIdentity={playerPosition?.row === rowIndex && playerPosition?.col === colIndex}
                         isEliminatedPlayer={isEliminatedPlayer}
                         isRevealed={card.isRevealed}
