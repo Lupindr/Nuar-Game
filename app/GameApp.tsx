@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import GameSetup from './components/GameSetup';
 import GameBoard from './components/GameBoard';
@@ -79,7 +81,7 @@ const compactBoard = (boardToCompact: Board): Board => {
 };
 
 
-const App: React.FC = () => {
+const GameApp: React.FC = () => {
     const [gamePhase, setGamePhase] = useState<GamePhase>(GamePhase.Setup);
     const [players, setPlayers] = useState<Player[]>([]);
     const [board, setBoard] = useState<Board>([]);
@@ -476,4 +478,4 @@ const App: React.FC = () => {
     return <div>{renderGameContent()}</div>;
 };
 
-export default App;
+export default GameApp;
