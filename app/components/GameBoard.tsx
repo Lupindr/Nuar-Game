@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { Board, Player } from '../types';
 import SuspectCard from './SuspectCard';
