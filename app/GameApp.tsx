@@ -227,6 +227,7 @@ const GameApp: React.FC = () => {
             currentPlayer={currentPlayer ?? null}
             players={game.players}
             isCompacting={game.isCompacting}
+            isCurrentPlayerView={isCurrentPlayer}
           />
           <div className="w-full bg-zinc-800 p-4 border-t-2 border-zinc-700 flex justify-center items-center space-x-4">
             <ActionButton
