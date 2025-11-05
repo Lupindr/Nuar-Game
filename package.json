@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && tsc --noEmit",
-    "start": "node .output/server/index.mjs"
+    "build": "vite build && tsc --noEmit && npm run build:server",
+    "build:server": "tsc -p tsconfig.server.json",
+    "start": "node .output/server/index.mjs",
+    "server": "npm run build:server && node server-dist/server/index.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.16",
