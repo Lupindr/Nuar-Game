@@ -22,3 +22,11 @@ View your app in AI Studio: https://ai.studio/apps/drive/1T5PGRi8E5OhYKiOUMXf16I
    `npm run build`
 5. Preview the production build:
    `npm run start`
+
+## Шаги запуска
+
+1. Запустить фронт
+   `npm run dev`
+
+2. Запустить сервер
+   `npm run server`
