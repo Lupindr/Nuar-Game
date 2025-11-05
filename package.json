@@ -4,22 +4,28 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tanstack start dev",
-    "build": "tanstack start build",
-    "start": "tanstack start start"
+    "dev": "vite dev",
+    "build": "vite build && tsc --noEmit",
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "@tanstack/react-router": "^1.0.0",
-    "@tanstack/react-start": "^1.0.3",
-    "@tanstack/start": "^1.0.3",
+    "@tailwindcss/vite": "^4.1.16",
+    "@tanstack/react-router": "^1.134.12",
+    "@tanstack/react-router-devtools": "^1.134.12",
+    "@tanstack/react-start": "^1.134.12",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.1.16"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^4.3.4",
-    "typescript": "~5.8.2",
-    "vite": "^5.4.11",
-    "vite-tsconfig-paths": "^4.3.1"
+    "@tailwindcss/postcss": "^4.1.16",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.1.0",
+    "postcss": "^8.5.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }
