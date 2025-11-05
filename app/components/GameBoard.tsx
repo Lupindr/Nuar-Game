@@ -1,5 +1,5 @@
 import React from 'react';
-import { Board, Player } from '../types';
+import { Board, Player } from '../types.js';
 import SuspectCard from './SuspectCard';
 
 interface GameBoardProps {

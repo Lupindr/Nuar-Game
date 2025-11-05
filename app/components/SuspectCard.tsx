@@ -1,5 +1,5 @@
 import React from 'react';
-import { BoardCard } from '../types';
+import { BoardCard } from '../types.js';
 
 interface SuspectCardProps {
   card: BoardCard;

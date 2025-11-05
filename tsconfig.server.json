@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "server-dist",
+    "target": "ES2022",
+    "noEmit": false,
+    "allowJs": false,
+    "declaration": false,
+    "isolatedModules": false,
+    "rootDir": "."
+  },
+  "include": ["server/**/*.ts", "shared/**/*.ts"],
+  "exclude": ["node_modules", "server-dist"]
+}
