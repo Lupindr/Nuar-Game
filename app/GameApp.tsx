@@ -94,7 +94,7 @@ const GameApp: React.FC = () => {
 
   const handleToggleIdentity = (targetId: string) => {
     if (!game) return
-    if (targetId !== playerId && !isCurrentPlayer) return
+    if (targetId !== playerId) return
     toggleIdentity(targetId)
   }
 
@@ -248,8 +248,8 @@ const GameApp: React.FC = () => {
           <PlayerDashboard
             players={game.players}
             currentPlayerId={currentPlayer?.id ?? ''}
+            viewerPlayerId={playerId}
             onToggleIdentity={handleToggleIdentity}
-            canToggleIdentity={(player) => player.id === playerId || isCurrentPlayer}
           />
         </div>
         <Modal isOpen={Boolean(modal)} title={modal?.title ?? ''} onClose={modal ? closeModal : undefined}>
