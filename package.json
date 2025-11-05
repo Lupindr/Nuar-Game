@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "vite dev --host",
     "build": "vite build && tsc --noEmit && npm run build:server",
     "build:server": "tsc -p tsconfig.server.json",
     "start": "node .output/server/index.mjs",

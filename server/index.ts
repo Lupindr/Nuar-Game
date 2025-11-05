@@ -321,7 +321,8 @@ wss.on('connection', (ws: SimpleWebSocket) => {
   })
 })
 
+const host = process.env.HOST || '0.0.0.0';
 const port = Number(process.env.PORT ?? 3001)
-server.listen(port, () => {
+server.listen(port, host, () => {
   console.log(`Game server listening on :${port}`)
 })

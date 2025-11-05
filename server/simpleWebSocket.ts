@@ -109,7 +109,9 @@ export class SimpleWebSocket extends EventEmitter {
 
   private handleData(chunk: Buffer) {
     this.buffer = Buffer.concat([this.buffer, chunk])
-    this.buffer = decodeFrames(this.buffer, (opcode, payload) => {
+
+    // @ts-ignore
+      this.buffer = decodeFrames(this.buffer, (opcode, payload) => {
       if (opcode === 0x8) {
         this.close()
         return
