@@ -84,6 +84,17 @@ const broadcastGameState = (session: Session) => {
   const payload = session.game.state
   const message: GameMessage = { type: 'gameState', payload }
   broadcast(session, message)
+
+  // If compaction is in progress, finalize after a short delay
+  if (payload.isCompacting && session.game.hasPendingCompaction()) {
+    setTimeout(() => {
+      if (!session.game) return
+      session.game.finalizeCompaction()
+      const payload2 = session.game.state
+      const message2: GameMessage = { type: 'gameState', payload: payload2 }
+      broadcast(session, message2)
+    }, 800)
+  }
 }
 
 const removePlayer = (session: Session, playerId: string, reason: string) => {

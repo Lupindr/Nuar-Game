@@ -26,7 +26,9 @@ const shuffleArray = <T,>(items: T[]): T[] => {
   return arr
 }
 
-const compactBoard = (board: Board): Board => {
+// Compute a compacted version of board if rules allow it.
+// Returns the same reference when compaction doesn't apply.
+const computeCompactedBoard = (board: Board): Board => {
   const rows = board.length
   if (!rows) return board
   const cols = board[0]?.length ?? 0
@@ -151,6 +153,7 @@ export const createInitialState = (players: PlayerSeed[]): GameState => {
 
 export class GameEngine {
   public state: GameState
+  private pendingCompactedBoard: Board | null = null
 
   constructor(players: PlayerSeed[]) {
     this.state = createInitialState(players)
@@ -212,7 +215,7 @@ export class GameEngine {
       const card = newBoard[position.row][position.col]
       card.isAlive = false
       card.isRevealed = true
-      this.state.board = compactBoard(newBoard)
+      this.startCompactionOrApply(newBoard)
     }
 
     const activePlayers = this.state.players.filter((p) => !p.isEliminated)
@@ -249,6 +252,30 @@ export class GameEngine {
     this.ensurePlayerTurn(playerId)
     this.state.modal = null
     this.advanceTurnInternal()
+  }
+
+  private startCompactionOrApply(boardAfterChanges: Board) {
+    const compacted = computeCompactedBoard(boardAfterChanges)
+    if (compacted !== boardAfterChanges) {
+      this.state.board = boardAfterChanges
+      this.state.isCompacting = true
+      this.pendingCompactedBoard = compacted
+    } else {
+      this.state.board = boardAfterChanges
+      this.state.isCompacting = false
+      this.pendingCompactedBoard = null
+    }
+  }
+
+  public hasPendingCompaction() {
+    return this.pendingCompactedBoard !== null
+  }
+
+  public finalizeCompaction() {
+    if (!this.pendingCompactedBoard) return
+    this.state.board = this.pendingCompactedBoard
+    this.pendingCompactedBoard = null
+    this.state.isCompacting = false
   }
 
   private transferIdentity(victim: Player) {
@@ -296,9 +323,9 @@ export class GameEngine {
         const killCard = killBoard[oldPosition.row][oldPosition.col]
         killCard.isAlive = false
         killCard.isRevealed = true
-        this.state.board = compactBoard(killBoard)
+        this.startCompactionOrApply(killBoard)
       } else {
-        this.state.board = compactBoard(board)
+        this.startCompactionOrApply(board)
       }
 
       if (trophies.length >= WIN_CONDITION_TROPHIES) {
@@ -322,7 +349,7 @@ export class GameEngine {
     } else {
       card.isAlive = false
       card.isRevealed = true
-      this.state.board = compactBoard(board)
+      this.startCompactionOrApply(board)
 
       current.bombs += 1
       if (current.bombs >= LOSE_CONDITION_BOMBS) {

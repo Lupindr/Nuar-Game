@@ -59,7 +59,7 @@ const SuspectCard: React.FC<SuspectCardProps> = ({ card, onClick, isSelectable, 
   const killAnimationClasses = isKillAnimating ? 'kill-animation' : '';
 
   const cardClasses = `
-    w-full aspect-[2/3] rounded-md shadow-lg border transition-all duration-500
+    w-full aspect-[2/3] rounded-md shadow-lg border transition-all duration-800
     flex flex-col p-1 bg-[#f5eeda] relative
     ${borderClasses}
     ${otherClasses}
