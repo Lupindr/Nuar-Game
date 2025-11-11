@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BoardCard } from '../types.js';
 
 interface SuspectCardProps {
@@ -27,8 +27,22 @@ const PaperclipIcon = () => (
 
 
 const SuspectCard: React.FC<SuspectCardProps> = ({ card, onClick, isSelectable, isPlayerIdentity, isEliminatedPlayer, isRevealed, isDisappearing }) => {
+  const [isKillAnimating, setIsKillAnimating] = useState(false);
+  const wasAliveRef = useRef(card.isAlive);
+
+  useEffect(() => {
+    if (wasAliveRef.current && !card.isAlive) {
+      setIsKillAnimating(true);
+      const timeout = setTimeout(() => setIsKillAnimating(false), 700);
+      wasAliveRef.current = card.isAlive;
+      return () => clearTimeout(timeout);
+    }
+
+    wasAliveRef.current = card.isAlive;
+  }, [card.isAlive]);
+
   const imageUrl = card.suspect.imageUrl;
-  
+
   let borderClasses = 'border-zinc-400';
   let otherClasses = '';
 
@@ -41,6 +55,9 @@ const SuspectCard: React.FC<SuspectCardProps> = ({ card, onClick, isSelectable, 
       otherClasses = 'cursor-pointer hover:scale-105';
   }
 
+  const interrogatedClasses = card.wasInterrogated ? 'interrogated-highlight' : '';
+  const killAnimationClasses = isKillAnimating ? 'kill-animation' : '';
+
   const cardClasses = `
     w-full aspect-[2/3] rounded-md shadow-lg border transition-all duration-500
     flex flex-col p-1 bg-[#f5eeda] relative
@@ -48,6 +65,8 @@ const SuspectCard: React.FC<SuspectCardProps> = ({ card, onClick, isSelectable, 
     ${otherClasses}
     ${!card.isAlive && !isDisappearing ? 'brightness-75' : ''}
     ${isDisappearing ? 'opacity-0 scale-50 rotate-12' : 'opacity-100 scale-100 rotate-0'}
+    ${interrogatedClasses}
+    ${killAnimationClasses}
   `;
 
   return (

@@ -1,2 +1,42 @@
 /* src/styles/app.css */
 @import 'tailwindcss';
+
+@keyframes kill-flash {
+  0% {
+    transform: scale(1) rotate(0deg);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  45% {
+    transform: scale(0.95) rotate(-2deg);
+    box-shadow: 0 0 25px 10px rgba(220, 38, 38, 0.4);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+.kill-animation {
+  animation: kill-flash 0.7s ease-out;
+}
+
+.kill-animation::after {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  border-radius: 0.75rem;
+  background: radial-gradient(circle at center, rgba(220, 38, 38, 0.35), transparent 65%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.interrogated-highlight::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 0.9rem;
+  border: 2px dashed rgba(56, 189, 248, 0.7);
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
+  pointer-events: none;
+}
+

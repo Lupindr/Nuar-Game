@@ -119,6 +119,7 @@ export const createInitialState = (players: PlayerSeed[]): GameState => {
         suspect,
         isAlive: true,
         isRevealed: false,
+        wasInterrogated: false,
       })),
     )
   }
@@ -325,11 +326,14 @@ export class GameEngine {
 
       current.bombs += 1
       if (current.bombs >= LOSE_CONDITION_BOMBS) {
-        this.state.modal = createModal(
-          'Фатальная ошибка',
-          `${current.name} убил мирного и накопил ${LOSE_CONDITION_BOMBS} бомб.`,
-        )
         this.eliminatePlayer(current.id, 'накопил слишком много бомб')
+        if (this.state.phase !== GamePhase.GameOver) {
+          this.state.modal = createModal(
+            'Фатальная ошибка',
+            `${current.name} убил мирного жителя и выбыл из игры после ${LOSE_CONDITION_BOMBS} бомб.`,
+          )
+          this.advanceTurnInternal()
+        }
       } else {
         this.state.modal = createModal(
           'Ошибка',
@@ -350,6 +354,7 @@ export class GameEngine {
     }
 
     const card = this.state.board[target.row][target.col]
+    card.wasInterrogated = true
     const positions = getAdjacentPositions(this.state.board, target.row, target.col)
     const responders = new Set<string>()
     const adjacentPlayers = this.state.players.filter(

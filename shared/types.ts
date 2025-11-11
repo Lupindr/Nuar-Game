@@ -8,6 +8,7 @@ export interface BoardCard {
   suspect: Suspect
   isAlive: boolean
   isRevealed?: boolean
+  wasInterrogated?: boolean
 }
 
 export interface Player {
