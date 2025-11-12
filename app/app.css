@@ -6,9 +6,13 @@
     transform: scale(1) rotate(0deg);
     box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
   }
-  45% {
-    transform: scale(0.95) rotate(-2deg);
-    box-shadow: 0 0 25px 10px rgba(220, 38, 38, 0.4);
+  30% {
+    transform: scale(0.92) rotate(-3deg);
+    box-shadow: 0 0 35px 12px rgba(220, 38, 38, 0.45);
+  }
+  65% {
+    transform: scale(1.04) rotate(2deg);
+    box-shadow: 0 0 18px 4px rgba(220, 38, 38, 0.3);
   }
   100% {
     transform: scale(1) rotate(0deg);
@@ -16,8 +20,52 @@
   }
 }
 
+@keyframes kill-slash {
+  0% {
+    opacity: 0;
+    transform: translateY(-20%) scaleX(0.8) rotate(-28deg);
+  }
+  20% {
+    opacity: 0.85;
+    transform: translateY(10%) scaleX(1) rotate(-28deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(80%) scaleX(1.05) rotate(-28deg);
+  }
+}
+
+@keyframes kill-ember {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
 .kill-animation {
-  animation: kill-flash 0.7s ease-out;
+  animation: kill-flash 0.75s ease-out;
+}
+
+.kill-animation::before {
+  content: '';
+  position: absolute;
+  inset: 15% 25%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(248, 113, 113, 0.75) 45%,
+    rgba(190, 18, 60, 0.9) 55%,
+    transparent 100%
+  );
+  border-radius: 999px;
+  filter: blur(1px);
+  opacity: 0;
+  pointer-events: none;
+  animation: kill-slash 0.6s ease-out;
 }
 
 .kill-animation::after {
@@ -28,6 +76,7 @@
   background: radial-gradient(circle at center, rgba(220, 38, 38, 0.35), transparent 65%);
   opacity: 0.9;
   pointer-events: none;
+  animation: kill-ember 0.6s ease-out;
 }
 
 .interrogated-highlight::before {
