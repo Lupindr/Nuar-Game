@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import {
+  ActionLogEntry,
   ActionType,
   Board,
   BoardCard,
@@ -146,6 +147,7 @@ export const createInitialState = (players: PlayerSeed[]): GameState => {
     selectablePositions: [],
     isCompacting: false,
     modal: null,
+    actionHistory: [],
   }
 
   return state
@@ -154,9 +156,14 @@ export const createInitialState = (players: PlayerSeed[]): GameState => {
 export class GameEngine {
   public state: GameState
   private pendingCompactedBoard: Board | null = null
+  private static readonly historyLimit = 25
 
   constructor(players: PlayerSeed[]) {
     this.state = createInitialState(players)
+    const firstPlayer = this.state.players[this.state.currentPlayerIndex]
+    if (firstPlayer) {
+      this.logAction('turn', `Игра начинается. Ход игрока ${firstPlayer.name}.`)
+    }
   }
 
   private get currentPlayer(): Player | undefined {
@@ -198,6 +205,16 @@ export class GameEngine {
     }
   }
 
+  private logAction(type: ActionLogEntry['type'], message: string) {
+    const entry: ActionLogEntry = {
+      id: randomUUID(),
+      type,
+      message,
+      timestamp: Date.now(),
+    }
+    this.state.actionHistory = [entry, ...this.state.actionHistory].slice(0, GameEngine.historyLimit)
+  }
+
   public selectAction(playerId: string, action: ActionType) {
     this.ensurePlayerTurn(playerId)
     this.state.activeAction = this.state.activeAction === action ? null : action
@@ -225,6 +242,7 @@ export class GameEngine {
     }
 
     this.state.modal = createModal('Игрок выбыл', `${player.name} покидает игру: ${reason}.`)
+    this.logAction('elimination', `${player.name} выбыл: ${reason}.`)
   }
 
   public dropPlayer(playerId: string, reason: string) {
@@ -246,6 +264,11 @@ export class GameEngine {
     this.state.currentPlayerIndex = nextIndex
     this.state.activeAction = null
     this.state.selectablePositions = []
+
+    const nextPlayer = this.state.players[nextIndex]
+    if (nextPlayer) {
+      this.logAction('turn', `Ход переходит к игроку ${nextPlayer.name}.`)
+    }
   }
 
   public advanceTurn(playerId: string) {
@@ -332,6 +355,7 @@ export class GameEngine {
         this.state.winnerId = current.id
         this.state.phase = GamePhase.GameOver
         this.state.modal = createModal('Победа!', `${current.name} собрал достаточное число трофеев.`)
+        this.logAction('kill', `${current.name} устранил ${targetPlayer.name} и одержал победу.`)
         return
       }
 
@@ -341,9 +365,11 @@ export class GameEngine {
           'Личность раскрыта',
           `${targetPlayer.name} был раскрыт игроком ${current.name} и получил новую личность.`,
         )
+        this.logAction('kill', `${current.name} раскрывает ${targetPlayer.name}, тот получает новую личность.`)
         this.advanceTurnInternal()
       } else {
         this.eliminatePlayer(targetPlayer.id, 'на поле не осталось свободных личностей')
+        this.logAction('kill', `${current.name} устраняет ${targetPlayer.name}.`)
         this.advanceTurnInternal()
       }
     } else {
@@ -359,12 +385,17 @@ export class GameEngine {
             'Фатальная ошибка',
             `${current.name} убил мирного жителя и выбыл из игры после ${LOSE_CONDITION_BOMBS} бомб.`,
           )
+          this.logAction('civilian', `${current.name} убивает мирного жителя и выбывает из игры.`)
           this.advanceTurnInternal()
         }
       } else {
         this.state.modal = createModal(
           'Ошибка',
           `${current.name} убил мирного жителя и получил бомбу (${current.bombs}/${LOSE_CONDITION_BOMBS}).`,
+        )
+        this.logAction(
+          'civilian',
+          `${current.name} убивает мирного жителя и получает бомбу (${current.bombs}/${LOSE_CONDITION_BOMBS}).`,
         )
         this.advanceTurnInternal()
       }
@@ -402,6 +433,7 @@ export class GameEngine {
         : `Никто не откликнулся на вопрос о ${card.suspect.name}.`
 
     this.state.modal = createModal('Результаты опроса', content)
+    this.logAction('interrogate', `${this.currentPlayer?.name ?? 'Игрок'} опрашивает ${card.suspect.name}. ${content}`)
     this.state.activeAction = null
     this.state.selectablePositions = []
     this.advanceTurnInternal()
@@ -434,6 +466,18 @@ export class GameEngine {
       }
     }
     this.state.board = board
+    const playerName = this.currentPlayer?.name ?? 'Игрок'
+    const targetIndex = index + 1
+    const axisLabel = axis === 'row' ? 'ряд' : 'колонку'
+    const directionLabel =
+      direction === 1
+        ? axis === 'row'
+          ? 'вправо'
+          : 'вниз'
+        : axis === 'row'
+          ? 'влево'
+          : 'вверх'
+    this.logAction('shift', `${playerName} сдвигает ${axisLabel} ${targetIndex} ${directionLabel}.`)
     this.advanceTurnInternal()
   }
 

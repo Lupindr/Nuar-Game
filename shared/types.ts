@@ -44,6 +44,13 @@ export interface ModalMessage {
   autoClose?: boolean
 }
 
+export interface ActionLogEntry {
+  id: string
+  type: 'turn' | 'kill' | 'civilian' | 'interrogate' | 'shift' | 'elimination'
+  message: string
+  timestamp: number
+}
+
 export interface GameState {
   phase: GamePhase
   board: Board
@@ -54,6 +61,7 @@ export interface GameState {
   selectablePositions: Position[]
   isCompacting: boolean
   modal: ModalMessage | null
+  actionHistory: ActionLogEntry[]
 }
 
 export interface PlayerSummary {

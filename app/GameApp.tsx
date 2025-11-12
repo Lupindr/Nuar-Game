@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react'
 import GameBoard from './components/GameBoard'
 import PlayerDashboard from './components/PlayerDashboard'
+import ActionHistory from './components/ActionHistory'
 import Modal from './components/Modal'
 import { useGameSession } from './hooks/useGameSession'
 import { ActionType } from './types.js'
@@ -213,45 +214,48 @@ const GameApp: React.FC = () => {
             Код: <span className="font-mono text-lg text-yellow-400">{sessionCode}</span>
           </div>
         </header>
-        <div className="flex-grow flex flex-col">
-          {error && (
-            <div className="bg-red-900/60 text-red-200 text-center py-2 text-sm border-b border-red-700">
-              {error}
+        <div className="flex-grow flex flex-col lg:flex-row">
+          <div className="flex flex-1 flex-col">
+            {error && (
+              <div className="bg-red-900/60 text-red-200 text-center py-2 text-sm border-b border-red-700">
+                {error}
+              </div>
+            )}
+            <GameBoard
+              board={game.board}
+              onCardClick={handleCardClick}
+              onShift={handleShift}
+              selectablePositions={game.selectablePositions}
+              currentPlayer={currentPlayer ?? null}
+              players={game.players}
+              isCompacting={game.isCompacting}
+              isCurrentPlayerView={isCurrentPlayer}
+            />
+            <div className="w-full bg-zinc-800 p-4 border-t-2 border-zinc-700 flex justify-center items-center space-x-4">
+              <ActionButton
+                label="Опрос"
+                action="interrogate"
+                active={game.activeAction === 'interrogate'}
+                disabled={!isCurrentPlayer}
+                onClick={handleActionClick}
+              />
+              <ActionButton
+                label="Убить"
+                action="kill"
+                active={game.activeAction === 'kill'}
+                disabled={!isCurrentPlayer}
+                onClick={handleActionClick}
+              />
             </div>
-          )}
-          <GameBoard
-            board={game.board}
-            onCardClick={handleCardClick}
-            onShift={handleShift}
-            selectablePositions={game.selectablePositions}
-            currentPlayer={currentPlayer ?? null}
-            players={game.players}
-            isCompacting={game.isCompacting}
-            isCurrentPlayerView={isCurrentPlayer}
-          />
-          <div className="w-full bg-zinc-800 p-4 border-t-2 border-zinc-700 flex justify-center items-center space-x-4">
-            <ActionButton
-              label="Опрос"
-              action="interrogate"
-              active={game.activeAction === 'interrogate'}
-              disabled={!isCurrentPlayer}
-              onClick={handleActionClick}
-            />
-            <ActionButton
-              label="Убить"
-              action="kill"
-              active={game.activeAction === 'kill'}
-              disabled={!isCurrentPlayer}
-              onClick={handleActionClick}
-            />
           </div>
-          <PlayerDashboard
-            players={game.players}
-            currentPlayerId={currentPlayer?.id ?? ''}
-            viewerPlayerId={playerId}
-            onToggleIdentity={handleToggleIdentity}
-          />
+          <ActionHistory entries={game.actionHistory} />
         </div>
+        <PlayerDashboard
+          players={game.players}
+          currentPlayerId={currentPlayer?.id ?? ''}
+          viewerPlayerId={playerId}
+          onToggleIdentity={handleToggleIdentity}
+        />
         <Modal isOpen={Boolean(modal)} title={modal?.title ?? ''} onClose={modal ? closeModal : undefined}>
           <p>{modal?.body}</p>
         </Modal>
