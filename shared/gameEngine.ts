@@ -41,23 +41,49 @@ const computeCompactedBoard = (board: Board): Board => {
 
   if (everyColHasDead) {
     const columns = Array.from({ length: cols }, (_, c) => board.map((row) => row[c]))
-    const filtered = columns.map((col) => col.filter((card) => card.isAlive))
-    const newRows = filtered[0]?.length ?? 0
+    const trimmedColumns = columns
+      .map((col) => {
+        const deadIndex = col.findIndex((card) => !card.isAlive)
+        if (deadIndex === -1) {
+          return col
+        }
+        // Remove a single eliminated suspect from each column to keep the grid rectangular.
+        return [...col.slice(0, deadIndex), ...col.slice(deadIndex + 1)]
+      })
+      .filter((col) => col.length > 0)
 
-    if (newRows < rows && filtered.every((col) => col.length === newRows)) {
-      if (newRows === 0) return []
-      return Array.from({ length: newRows }, (_, r) => filtered.map((col) => col[r]))
+    if (!trimmedColumns.length) {
+      return []
+    }
+
+    const newRows = trimmedColumns[0]?.length ?? 0
+
+    if (newRows < rows && trimmedColumns.every((col) => col.length === newRows)) {
+      return Array.from({ length: newRows }, (_, r) => trimmedColumns.map((col) => col[r]))
     }
   }
 
   const everyRowHasDead = board.every((row) => row.some((card) => !card.isAlive))
   if (everyRowHasDead) {
-    const filteredRows = board.map((row) => row.filter((card) => card.isAlive))
-    const newCols = filteredRows[0]?.length ?? 0
+    const trimmedRows = board
+      .map((row) => {
+        const deadIndex = row.findIndex((card) => !card.isAlive)
+        if (deadIndex === -1) {
+          return row
+        }
+        // Remove one eliminated suspect per row to compact the board horizontally.
+        return [...row.slice(0, deadIndex), ...row.slice(deadIndex + 1)]
+      })
+      .filter((row) => row.length > 0)
 
-    if (newCols < cols && filteredRows.every((row) => row.length === newCols)) {
-      if (newCols === 0) return []
-      return filteredRows
+    if (!trimmedRows.length) {
+      return []
+    }
+
+    const newCols = trimmedRows[0]?.length ?? 0
+
+    if (newCols < cols && trimmedRows.every((row) => row.length === newCols)) {
+      return trimmedRows
     }
   }
 
